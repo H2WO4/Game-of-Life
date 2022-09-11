@@ -1,0 +1,32 @@
+unstable_features = true
+edition = "2021"
+
+max_width = 200
+chain_width = 40
+force_multiline_blocks = false
+blank_lines_upper_bound = 2
+
+indent_style = "Visual"
+
+enum_discrim_align_threshold = 20
+struct_field_align_threshold = 20
+
+trailing_semicolon = false
+
+imports_indent = "Visual"
+imports_layout = "Horizontal"
+imports_granularity = "Module"
+group_imports = "StdExternalCrate"
+
+match_arm_blocks = false
+match_block_trailing_comma = true
+
+reorder_impl_items = true
+
+format_macro_matchers = true
+format_macro_bodies = true
+
+format_code_in_doc_comments = true
+# error_on_unformatted = true
+
+use_try_shorthand = true
