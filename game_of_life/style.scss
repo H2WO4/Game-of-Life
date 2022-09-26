@@ -1,0 +1,54 @@
+body {
+    margin: 0px;
+    padding: 0px;
+
+    display: flex;
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+
+    background-color: black;
+
+    width: 20%;
+    height: 100vh;
+    padding: 5px;
+}
+
+.universe {
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+
+    width: auto;
+}
+
+.play-btn {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    & > * {
+        width: 100%;
+    }
+}
+
+.inner-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.cell {
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+
+    &.alive {
+        background-color: green;
+    }
+
+    &.dead {
+        background-color: grey;
+    }
+}
