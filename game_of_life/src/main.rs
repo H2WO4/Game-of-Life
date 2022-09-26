@@ -15,11 +15,10 @@ use universe::Obj as Universe;
 use yew::prelude::*;
 use yew_agent::{Agent, AgentLink, Bridge, Bridged, Dispatched, Dispatcher, HandlerId};
 
-use crate::rules::Rules;
+use rules::Rules;
 
 
 mod universe {
-
     use super::*;
 
     pub struct Obj {
@@ -179,14 +178,14 @@ mod universe {
 mod play_button {
     use super::*;
 
-    #[derive(PartialEq)]
-    enum State {
-        Playing,
-        Paused,
-    }
     pub struct Obj {
         state:     State,
         event_bus: Dispatcher<ToUniverse>,
+    }
+	#[derive(PartialEq)]
+    enum State {
+        Playing,
+        Paused,
     }
     pub enum Msg {
         Play,
