@@ -7,15 +7,16 @@ mod rules;
 
 use std::collections::HashSet;
 
+use gen_button::Obj as GenButton;
 use gloo_timers::callback::Interval;
 use grid::Grid;
 use play_button::Obj as PlayButton;
+use rules::Rules;
 use to_universe::Obj as ToUniverse;
 use universe::Obj as Universe;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_agent::{Agent, AgentLink, Bridge, Bridged, Dispatched, Dispatcher, HandlerId};
-
-use rules::Rules;
 
 
 mod universe {
@@ -30,7 +31,7 @@ mod universe {
         _producer: Box<dyn Bridge<ToUniverse>>,
     }
     #[derive(PartialEq)]
-	enum State {
+    enum State {
         Playing,
         Paused,
     }
@@ -39,7 +40,12 @@ mod universe {
         Pause,
         Tick,
         Step,
+
+        Generate(u8),
+        Clear,
+
         ChangeSize(usize, usize),
+
         Toggle(usize, usize),
 
         Message(Box<Msg>),
@@ -120,6 +126,27 @@ mod universe {
                     true
                 },
 
+                Generate(prob) => {
+                    let (width, height) = self.cells.size();
+                    let prob = prob as f32 / 100.0;
+
+                    for x in 0..width {
+                        for y in 0..height {
+                            let cell = self.cells.get_mut(x, y).unwrap();
+                            *cell = rand::random::<f32>() < prob;
+                        }
+                    }
+
+                    true
+                },
+
+                Clear => {
+                    let (width, height) = self.cells.size();
+                    self.cells = Grid::init(width, height, false);
+
+                    true
+                },
+
                 Toggle(x, y) => {
                     let cell = self.cells.get_mut(x, y).unwrap();
                     *cell = !*cell;
@@ -182,7 +209,7 @@ mod play_button {
         state:     State,
         event_bus: Dispatcher<ToUniverse>,
     }
-	#[derive(PartialEq)]
+    #[derive(PartialEq)]
     enum State {
         Playing,
         Paused,
@@ -248,6 +275,73 @@ mod play_button {
 }
 
 
+mod gen_button {
+    use super::*;
+
+    pub struct Obj {
+        input_ref: NodeRef,
+        event_bus: Dispatcher<ToUniverse>,
+    }
+    pub enum Msg {
+        Generate,
+        Clear,
+    }
+    impl Component for Obj {
+        type Message = Msg;
+        type Properties = ();
+
+        fn create(ctx: &Context<Self>) -> Self {
+            let input_ref = NodeRef::default();
+            let event_bus = ToUniverse::dispatcher();
+
+            Self { event_bus, input_ref }
+        }
+
+        fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+            use to_universe::In;
+            use Msg::*;
+
+            match msg {
+                Generate => {
+                    let prob = self.input_ref
+                                   .cast::<HtmlInputElement>()
+                                   .unwrap()
+                                   .value()
+                                   .parse()
+                                   .unwrap();
+
+                    log::debug!("Generate: {}", prob);
+                    self.event_bus.send(In::Generate(prob));
+                    false
+                },
+
+                Clear => {
+                    self.event_bus.send(In::Clear);
+                    false
+                },
+            }
+        }
+
+        fn view(&self, ctx: &Context<Self>) -> Html {
+            let generate = ctx.link().callback(|_| Msg::Generate);
+            let clear = ctx.link().callback(|_| Msg::Clear);
+
+            html! {
+                <div class={ "gen-btn" }>
+                    <input type={ "range" } min={ 0 } max={ 100 } ref={ self.input_ref.clone() } />
+                    <button onclick={ generate }>
+                        { "Generate" }
+                    </button>
+                    <button onclick={ clear }>
+                        { "Clear" }
+                    </button>
+                </div>
+            }
+        }
+    }
+}
+
+
 mod to_universe {
     use super::*;
 
@@ -259,6 +353,9 @@ mod to_universe {
         Play,
         Pause,
         Step,
+
+        Generate(u8),
+        Clear,
     }
     impl Agent for Obj {
         type Input = In;
@@ -294,6 +391,18 @@ mod to_universe {
                         self.link
                             .respond(*sub, Box::new(Out::Step));
                     },
+
+                In::Generate(prob) =>
+                    for sub in self.subscribers.iter() {
+                        self.link
+                            .respond(*sub, Box::new(Out::Generate(prob)));
+                    },
+
+                In::Clear =>
+                    for sub in self.subscribers.iter() {
+                        self.link
+                            .respond(*sub, Box::new(Out::Clear));
+                    },
             }
         }
 
@@ -314,9 +423,10 @@ fn app() -> Html {
         <>
             <div class={ "option" }>
                 <PlayButton />
+                <GenButton />
             </div>
 
-            <Universe width=20 height=20 />
+            <Universe width=30 height=50 />
         </>
     }
 }

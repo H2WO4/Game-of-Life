@@ -1,54 +1,76 @@
-body {
-    margin: 0px;
-    padding: 0px;
+* {
+	box-sizing: border-box;
+}
 
-    display: flex;
+body {
+	margin: 0px;
+	padding: 0px;
+
+	display: flex;
 }
 
 .option {
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 
-    background-color: black;
+	background-color: black;
 
-    width: 20%;
-    height: 100vh;
-    padding: 5px;
-}
+	width: 20%;
+	height: 100vh;
+	padding: 5px;
 
-.universe {
-    display: flex;
-    flex-direction: column;
-    margin: 5px;
-
-    width: auto;
+	&>* {
+		display: flex;
+		flex-direction: row;
+		width: 100%;
+	}
 }
 
 .play-btn {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
+	&>button {
+		width: 100%;
+	}
+}
 
-    & > * {
-        width: 100%;
-    }
+
+.gen-btn {
+	&>button {
+		width: 25%;
+	}
+
+	&>input {
+		width: 50%;
+	}
+}
+
+.universe {
+	display: flex;
+	flex-direction: column;
+	margin: 0px;
+
+	width: 80%;
 }
 
 .inner-row {
-    display: flex;
-    flex-direction: row;
+	display: flex;
+	flex-direction: row;
+	width: 100vh;
+	height: 100%;
 }
 
 .cell {
-    border: none;
-    padding: 10px;
-    cursor: pointer;
+	display: block;
 
-    &.alive {
-        background-color: green;
-    }
+	border: none;
+	width: 100%;
+	padding: 10px;
+	cursor: pointer;
 
-    &.dead {
-        background-color: grey;
-    }
+	&.alive {
+		background-color: green;
+	}
+
+	&.dead {
+		background-color: grey;
+	}
 }
