@@ -61,10 +61,10 @@ impl Component for Obj {
             <div class={ "size-btn" }>
                <input type={ "number" } value={ 96 } ref={ self.width_ref.clone() } />
                <input type={ "number" } value={ 64 } ref={ self.height_ref.clone() } />
-               <div>
+               <label>
                    <input type={ "checkbox" } ref={ self.torus_ref.clone() } checked={ true } />
-                   <label>{ "Torus" }</label>
-               </div>
+                   { "Torus" }
+               </label>
                <button onclick={ change_size } >
                    { "Change Size" }
                </button>

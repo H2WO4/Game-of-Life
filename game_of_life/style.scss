@@ -92,18 +92,16 @@ body {
 		width: 25%;
 	}
 
-	&>div {
+	&>label {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 
 		width: 25%;
 
-		&>label {
-			font-family: 'Courier New', Courier, monospace;
-			font-weight: bold;
-			color: white;
-		}
+		font-family: 'Courier New', Courier, monospace;
+		font-weight: bold;
+		color: white;
 	}
 }
 
