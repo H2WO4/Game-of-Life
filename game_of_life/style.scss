@@ -25,13 +25,24 @@ body {
 		flex-direction: row;
 		width: 80%;
 
-		margin: 5% auto;
+		margin: 3% auto;
 	}
 }
 
 .play-btn {
 	&>button {
 		width: 100%;
+	}
+}
+
+
+.speed-btn {
+	&>input {
+		width: 75%;
+	}
+
+	&>button {
+		width: 25%;
 	}
 }
 
@@ -48,11 +59,25 @@ body {
 
 .size-btn {
 	&>button {
-		width: 40%;
+		width: 30%;
 	}
 
 	&>input {
-		width: 30%;
+		width: 25%;
+	}
+
+	&>div {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		width: 20%;
+
+		&>label {
+			font-family: 'Courier New', Courier, monospace;
+			font-weight: bold;
+			color: white;
+		}
 	}
 }
 

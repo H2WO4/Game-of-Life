@@ -13,6 +13,7 @@ use grid::Grid;
 use play_button::Obj as PlayButton;
 use rules::Rules;
 use size_button::Obj as SizeButton;
+use speed_button::Obj as SpeedButton;
 use to_universe::Obj as ToUniverse;
 use universe::Obj as Universe;
 use web_sys::HtmlInputElement;
@@ -28,8 +29,10 @@ mod universe {
     pub struct Obj {
         pub cells: Grid<bool>,
         rules:     Rules,
+        torus:     bool,
 
         _interval: Option<Interval>,
+        _speed:    u16,
         _producer: Box<dyn Bridge<ToUniverse>>,
     }
     #[derive(PartialEq)]
@@ -38,10 +41,12 @@ mod universe {
         Pause,
         Step,
 
+        ChangeSpeed(u16),
+
         Generate(u8),
         Clear,
 
-        ChangeSize(usize, usize),
+        ChangeSize(usize, usize, bool),
 
         Toggle(usize, usize),
 
@@ -68,7 +73,9 @@ mod universe {
 
             Self { cells,
                    rules,
+                   torus: false,
                    _producer,
+                   _speed: 200,
                    _interval }
         }
 
@@ -78,9 +85,9 @@ mod universe {
             match msg {
                 Play => {
                     let callback = ctx.link().callback(|_| Msg::Step);
-                    self._interval = Some(Interval::new(100, move || callback.emit(())));
+                    self._interval = Some(Interval::new(self._speed.into(), move || callback.emit(())));
 
-					ctx.link().send_message(Msg::Step);
+                    ctx.link().send_message(Msg::Step);
 
                     false
                 },
@@ -120,6 +127,17 @@ mod universe {
                     true
                 },
 
+                ChangeSpeed(speed) => {
+                    self._speed = speed;
+
+                    if self._interval.is_some() {
+                        ctx.link().send_message(Msg::Pause);
+                        ctx.link().send_message(Msg::Play);
+                    }
+
+                    false
+                },
+
                 Generate(prob) => {
                     let (width, height) = self.cells.size();
                     let prob = prob as f32 / 100.0;
@@ -141,6 +159,26 @@ mod universe {
                     true
                 },
 
+                ChangeSize(width, height, torus) => {
+                    let (old_width, old_height) = self.cells.size();
+
+                    let mut new_cells = Grid::init(width, height, false);
+
+                    for x in 0..width.min(old_width) {
+                        for y in 0..height.min(old_height) {
+                            let new_cell = new_cells.get_mut(x, y).unwrap();
+                            let cell = self.cells.get(x, y).unwrap();
+
+                            *new_cell = *cell;
+                        }
+                    }
+                    self.cells = new_cells;
+
+                    self.torus = torus;
+
+                    true
+                },
+
                 Toggle(x, y) => {
                     let cell = self.cells.get_mut(x, y).unwrap();
                     *cell = !*cell;
@@ -148,7 +186,6 @@ mod universe {
                 },
 
                 Message(msg) => self.update(ctx, *msg),
-                _ => todo!(),
             }
         }
 
@@ -157,10 +194,10 @@ mod universe {
 
             html! {
                 <div class={ "universe" }>
-                    { for (0..width).map(|x| {
+                    { for (0..height).map(|y| {
                         html! {
                             <div class={ "inner-row" }>
-                                { for (0..height).map(|y| {
+                                { for (0..width).map(|x| {
                                     let alive = self.cells[x][y];
                                     let onclick = ctx.link().callback(move |_| Msg::Toggle(x, y));
 
@@ -179,17 +216,34 @@ mod universe {
         fn get_neighbors(&self, x: usize, y: usize) -> [Option<bool>; 8] {
             const NEIGHBORS: [(isize, isize); 8] = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
 
-            NEIGHBORS.map(|(i, j)| {
-                         let x = x.checked_add_signed(i);
-                         let y = y.checked_add_signed(j);
+            let (width, height) = self.cells.size();
+            let x = x as isize;
+            let y = y as isize;
 
-                         x.and_then(|x| {
-                              y.and_then(|y| {
-                                   self.cells
-                                       .get(x, y)
-                                       .and_then(|val| Some(*val))
-                               })
-                          })
+            NEIGHBORS.map(|(i, j)| {
+                         let x = x + i;
+                         let y = y + j;
+
+                         if self.torus {
+                             let x = match x {
+                                 x if x < 0 => x + width as isize,
+                                 x if x >= width as isize => x - width as isize,
+                                 x => x,
+                             };
+                             let y = match y {
+                                 y if y < 0 => y + height as isize,
+                                 y if y >= height as isize => y - height as isize,
+                                 y => y,
+                             };
+
+                             self.cells
+                                 .get(x as usize, y as usize)
+                                 .and_then(|val| Some(*val))
+                         } else {
+                             self.cells
+                                 .get(x as usize, y as usize)
+                                 .and_then(|val| Some(*val))
+                         }
                      })
         }
     }
@@ -269,6 +323,63 @@ mod play_button {
 }
 
 
+mod speed_button {
+    use super::*;
+
+    pub struct Obj {
+        input_ref: NodeRef,
+        event_bus: Dispatcher<ToUniverse>,
+    }
+    pub enum Msg {
+        ChangeSpeed,
+    }
+    impl Component for Obj {
+        type Message = Msg;
+        type Properties = ();
+
+        fn create(ctx: &Context<Self>) -> Self {
+            Self { input_ref: NodeRef::default(),
+                   event_bus: ToUniverse::dispatcher(), }
+        }
+
+        fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+            use to_universe::In;
+            use Msg::*;
+
+            match msg {
+                ChangeSpeed => {
+                    let speed = self.input_ref
+                                    .cast::<HtmlInputElement>()
+                                    .unwrap()
+                                    .value()
+                                    .parse()
+                                    .unwrap();
+
+                    self.event_bus
+                        .send(In::ChangeSpeed(speed));
+
+                    false
+                },
+            }
+        }
+
+        fn view(&self, ctx: &Context<Self>) -> Html {
+            let change_speed = ctx.link()
+                                  .callback(|_| Msg::ChangeSpeed);
+
+            html! {
+                <div class={ "speed-btn" }>
+                    <input type={ "range" } min={ 50 } max={ 1000 } step={ 50 } value={ 200 }  ref={ self.input_ref.clone() } />
+                    <button onclick={ change_speed }>
+                        { "Change Speed" }
+                    </button>
+                </div>
+            }
+        }
+    }
+}
+
+
 mod gen_button {
     use super::*;
 
@@ -304,7 +415,6 @@ mod gen_button {
                                    .parse()
                                    .unwrap();
 
-                    log::debug!("Generate: {}", prob);
                     self.event_bus.send(In::Generate(prob));
                     false
                 },
@@ -322,7 +432,7 @@ mod gen_button {
 
             html! {
                 <div class={ "gen-btn" }>
-                    <input type={ "range" } min={ 0 } max={ 100 } ref={ self.input_ref.clone() } />
+                    <input type={ "range" } min={ 0 } max={ 100 } step={ 5 } ref={ self.input_ref.clone() } />
                     <button onclick={ generate }>
                         { "Generate" }
                     </button>
@@ -342,10 +452,13 @@ mod size_button {
     pub struct Obj {
         width_ref:  NodeRef,
         height_ref: NodeRef,
+
+        torus_ref: NodeRef,
+
+        event_bus: Dispatcher<ToUniverse>,
     }
     pub enum Msg {
         ChangeSize,
-        Torus,
     }
     impl Component for Obj {
         type Message = Msg;
@@ -353,21 +466,55 @@ mod size_button {
 
         fn create(ctx: &Context<Self>) -> Self {
             Self { width_ref:  NodeRef::default(),
-                   height_ref: NodeRef::default(), }
+                   height_ref: NodeRef::default(),
+                   torus_ref:  NodeRef::default(),
+                   event_bus:  ToUniverse::dispatcher(), }
         }
 
         fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+            use to_universe::In;
+            use Msg::*;
+
             match msg {
-                _ => todo!(),
+                ChangeSize => {
+                    let width = self.width_ref
+                                    .cast::<HtmlInputElement>()
+                                    .unwrap()
+                                    .value()
+                                    .parse()
+                                    .unwrap();
+
+                    let height = self.height_ref
+                                     .cast::<HtmlInputElement>()
+                                     .unwrap()
+                                     .value()
+                                     .parse()
+                                     .unwrap();
+
+                    let torus = self.torus_ref
+                                    .cast::<HtmlInputElement>()
+                                    .unwrap()
+                                    .checked();
+
+                    self.event_bus
+                        .send(In::ChangeSize(width, height, torus));
+                    false
+                },
             }
         }
 
         fn view(&self, ctx: &Context<Self>) -> Html {
+            let change_size = ctx.link().callback(|_| Msg::ChangeSize);
+
             html! {
                 <div class={ "size-btn" }>
                    <input type={ "number" } value={ 96 } ref={ self.width_ref.clone() } />
                    <input type={ "number" } value={ 64 } ref={ self.height_ref.clone() } />
-                   <button>
+                   <div>
+                       <input type={ "checkbox" } ref={ self.torus_ref.clone() } />
+                       <label>{ "Torus" }</label>
+                   </div>
+                   <button onclick={ change_size } >
                        { "Change Size" }
                    </button>
                 </div>
@@ -389,8 +536,12 @@ mod to_universe {
         Pause,
         Step,
 
+        ChangeSpeed(u16),
+
         Generate(u8),
         Clear,
+
+        ChangeSize(usize, usize, bool),
     }
     impl Agent for Obj {
         type Input = In;
@@ -427,6 +578,12 @@ mod to_universe {
                             .respond(*sub, Box::new(Out::Step));
                     },
 
+                In::ChangeSpeed(speed) =>
+                    for sub in self.subscribers.iter() {
+                        self.link
+                            .respond(*sub, Box::new(Out::ChangeSpeed(speed)));
+                    },
+
                 In::Generate(prob) =>
                     for sub in self.subscribers.iter() {
                         self.link
@@ -437,6 +594,12 @@ mod to_universe {
                     for sub in self.subscribers.iter() {
                         self.link
                             .respond(*sub, Box::new(Out::Clear));
+                    },
+
+                In::ChangeSize(width, height, torus) =>
+                    for sub in self.subscribers.iter() {
+                        self.link
+                            .respond(*sub, Box::new(Out::ChangeSize(width, height, torus)));
                     },
             }
         }
@@ -458,11 +621,12 @@ fn app() -> Html {
         <>
             <div class={ "option" }>
                 <PlayButton />
+                <SpeedButton />
                 <GenButton />
                 <SizeButton />
             </div>
 
-            <Universe height=96 width=64 />
+            <Universe width=96 height=64 />
         </>
     }
 }
