@@ -6,12 +6,14 @@
 mod rules;
 
 use std::collections::HashSet;
+use std::mem::replace;
 
 use gen_button::Obj as GenButton;
 use gloo_timers::callback::Interval;
 use grid::Grid;
 use play_button::Obj as PlayButton;
 use rules::Rules;
+use rules_button::Obj as RulesButton;
 use size_button::Obj as SizeButton;
 use speed_button::Obj as SpeedButton;
 use to_universe::Obj as ToUniverse;
@@ -22,8 +24,6 @@ use yew_agent::{Agent, AgentLink, Bridge, Bridged, Dispatched, Dispatcher, Handl
 
 
 mod universe {
-    use std::mem::replace;
-
     use super::*;
 
     pub struct Obj {
@@ -48,8 +48,9 @@ mod universe {
 
         ChangeSize(usize, usize, bool),
 
-        Toggle(usize, usize),
+        ChangeRules(Rules),
 
+        Toggle(usize, usize),
         Message(Box<Msg>),
     }
     #[derive(PartialEq, Properties)]
@@ -73,7 +74,7 @@ mod universe {
 
             Self { cells,
                    rules,
-                   torus: false,
+                   torus: true,
                    _producer,
                    _speed: 200,
                    _interval }
@@ -177,6 +178,11 @@ mod universe {
                     self.torus = torus;
 
                     true
+                },
+
+                ChangeRules(rules) => {
+                    self.rules = rules;
+                    false
                 },
 
                 Toggle(x, y) => {
@@ -511,12 +517,69 @@ mod size_button {
                    <input type={ "number" } value={ 96 } ref={ self.width_ref.clone() } />
                    <input type={ "number" } value={ 64 } ref={ self.height_ref.clone() } />
                    <div>
-                       <input type={ "checkbox" } ref={ self.torus_ref.clone() } />
+                       <input type={ "checkbox" } ref={ self.torus_ref.clone() } checked={ true } />
                        <label>{ "Torus" }</label>
                    </div>
                    <button onclick={ change_size } >
                        { "Change Size" }
                    </button>
+                </div>
+            }
+        }
+    }
+}
+
+
+mod rules_button {
+    use super::*;
+
+    pub struct Obj {
+        input_ref: NodeRef,
+        event_bus: Dispatcher<ToUniverse>,
+    }
+    pub enum Msg {
+        ChangeRules,
+    }
+    impl Component for Obj {
+        type Message = Msg;
+        type Properties = ();
+
+        fn create(ctx: &Context<Self>) -> Self {
+            Self { input_ref: NodeRef::default(),
+                   event_bus: ToUniverse::dispatcher(), }
+        }
+
+        fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+            use to_universe::In;
+            use Msg::*;
+
+            match msg {
+                ChangeRules => {
+                    let rules = self.input_ref
+                                    .cast::<HtmlInputElement>()
+                                    .unwrap()
+                                    .value();
+
+                    if let Ok(rules) = Rules::from_string(&rules) {
+                        self.event_bus
+                            .send(In::ChangeRules(rules));
+                    }
+
+                    false
+                },
+            }
+        }
+
+        fn view(&self, ctx: &Context<Self>) -> Html {
+            let change_rules = ctx.link()
+                                  .callback(|_| Msg::ChangeRules);
+
+            html! {
+                <div class={ "rules-btn" }>
+                    <input type={ "text" } value={ "B3/S23" } ref={ self.input_ref.clone() } />
+                    <button onclick={ change_rules }>
+                        { "Change Rules" }
+                    </button>
                 </div>
             }
         }
@@ -542,6 +605,8 @@ mod to_universe {
         Clear,
 
         ChangeSize(usize, usize, bool),
+
+        ChangeRules(Rules),
     }
     impl Agent for Obj {
         type Input = In;
@@ -601,6 +666,12 @@ mod to_universe {
                         self.link
                             .respond(*sub, Box::new(Out::ChangeSize(width, height, torus)));
                     },
+
+                In::ChangeRules(rules) =>
+                    for sub in self.subscribers.iter() {
+                        self.link
+                            .respond(*sub, Box::new(Out::ChangeRules(rules.clone())));
+                    },
             }
         }
 
@@ -620,10 +691,33 @@ fn app() -> Html {
     html! {
         <>
             <div class={ "option" }>
-                <PlayButton />
-                <SpeedButton />
-                <GenButton />
-                <SizeButton />
+                <div class={ "config" }>
+                    <PlayButton />
+                    <SpeedButton />
+                    <GenButton />
+                    <SizeButton />
+                    <RulesButton />
+                </div>
+                <div class={ "help" } >
+                    <div>
+                        { "Some rules:" }
+                    </div>
+                    <div>
+                        { "Standard: B3/S23" }
+                    </div>
+                    <div>
+                        { "Day & Night: B3678/S34678" }
+                    </div>
+                    <div>
+                        { "AntiLife: B0123478/S01234678" }
+                    </div>
+                    <div>
+                        { "Replicator: B1357/S1357" }
+                    </div>
+                    <div>
+                        { "Life w/ Death: B3/S012345678" }
+                    </div>
+                </div>
             </div>
 
             <Universe width=96 height=64 />
