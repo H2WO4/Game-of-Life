@@ -51,6 +51,16 @@ body {
 	}
 }
 
+.run-btn {
+	&>input {
+		width: 75%;
+	}
+
+	&>button {
+		width: 25%;
+	}
+}
+
 
 .speed-btn {
 	&>input {
