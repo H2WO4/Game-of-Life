@@ -12,6 +12,7 @@ use gloo_timers::callback::Interval;
 use grid::Grid;
 use play_button::Obj as PlayButton;
 use rules::Rules;
+use size_button::Obj as SizeButton;
 use to_universe::Obj as ToUniverse;
 use universe::Obj as Universe;
 use web_sys::HtmlInputElement;
@@ -20,25 +21,21 @@ use yew_agent::{Agent, AgentLink, Bridge, Bridged, Dispatched, Dispatcher, Handl
 
 
 mod universe {
+    use std::mem::replace;
+
     use super::*;
 
     pub struct Obj {
         pub cells: Grid<bool>,
         rules:     Rules,
-        state:     State,
 
-        _interval: Interval,
+        _interval: Option<Interval>,
         _producer: Box<dyn Bridge<ToUniverse>>,
     }
     #[derive(PartialEq)]
-    enum State {
-        Playing,
-        Paused,
-    }
     pub enum Msg {
         Play,
         Pause,
-        Tick,
         Step,
 
         Generate(u8),
@@ -67,12 +64,10 @@ mod universe {
             let rules = Rules::default();
 
             let _producer = ToUniverse::bridge(ctx.link().callback(Msg::Message));
-            let callback = ctx.link().callback(|_| Msg::Tick);
-            let _interval = Interval::new(100, move || callback.emit(()));
+            let _interval = None;
 
             Self { cells,
                    rules,
-                   state: State::Paused,
                    _producer,
                    _interval }
         }
@@ -82,20 +77,19 @@ mod universe {
 
             match msg {
                 Play => {
-                    self.state = State::Playing;
+                    let callback = ctx.link().callback(|_| Msg::Step);
+                    self._interval = Some(Interval::new(100, move || callback.emit(())));
+
+					ctx.link().send_message(Msg::Step);
+
                     false
                 },
 
                 Pause => {
-                    self.state = State::Paused;
-                    false
-                },
+                    let interval = replace(&mut self._interval, None);
+                    interval.unwrap().cancel();
 
-                Tick => {
-                    if self.state == State::Playing {
-                        ctx.link().send_message(Msg::Step);
-                    }
-                    true
+                    false
                 },
 
                 Step => {
@@ -342,6 +336,47 @@ mod gen_button {
 }
 
 
+mod size_button {
+    use super::*;
+
+    pub struct Obj {
+        width_ref:  NodeRef,
+        height_ref: NodeRef,
+    }
+    pub enum Msg {
+        ChangeSize,
+        Torus,
+    }
+    impl Component for Obj {
+        type Message = Msg;
+        type Properties = ();
+
+        fn create(ctx: &Context<Self>) -> Self {
+            Self { width_ref:  NodeRef::default(),
+                   height_ref: NodeRef::default(), }
+        }
+
+        fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+            match msg {
+                _ => todo!(),
+            }
+        }
+
+        fn view(&self, ctx: &Context<Self>) -> Html {
+            html! {
+                <div class={ "size-btn" }>
+                   <input type={ "number" } value={ 96 } ref={ self.width_ref.clone() } />
+                   <input type={ "number" } value={ 64 } ref={ self.height_ref.clone() } />
+                   <button>
+                       { "Change Size" }
+                   </button>
+                </div>
+            }
+        }
+    }
+}
+
+
 mod to_universe {
     use super::*;
 
@@ -424,9 +459,10 @@ fn app() -> Html {
             <div class={ "option" }>
                 <PlayButton />
                 <GenButton />
+                <SizeButton />
             </div>
 
-            <Universe width=30 height=50 />
+            <Universe height=96 width=64 />
         </>
     }
 }
