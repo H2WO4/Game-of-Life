@@ -3,6 +3,9 @@ name = "game_of_life_v2"
 version = "0.1.0"
 edition = "2021"
 
+[toolchain]
+channel = "nightly"
+
 [dependencies]
 getrandom = { version = "0.2.7", features = ["js"] }
 gloo-timers = "0.2.4"
