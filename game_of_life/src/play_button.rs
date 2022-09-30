@@ -85,8 +85,8 @@ impl Component for Obj {
                     </button>
                 </div>
                 <div class={ "run-btn" }>
-                    <input type={ "number" } ref={ self.input_ref.clone() }/>
-                    <button onclick={ run_for }>
+                    <input type={ "number" } ref={ self.input_ref.clone() } disabled={ self.state == State::Playing }/>
+                    <button onclick={ run_for } disabled={ self.state == State::Playing }>
                         { "Run for" }
                     </button>
                 </div>
