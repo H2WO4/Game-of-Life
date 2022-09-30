@@ -8,135 +8,145 @@
 flowchart LR;
 	a([A: Game of Life])
 
-	b1(B1: Input)
-	b2(B2: Display)
+	b0(B0: Input)
+	b1(B1: Display)
 
-	c10[C10: Play Input]
-	c11[C11: Speed Input]
-	c12[C12: Generate Input]
-	c13[C13: Size Input]
-	c14[C14: Rules Input]
+	c00[C00: Play Input]
+	c01[C01: Speed Input]
+	c02[C02: Generate Input]
+	c03[C03: Size Input]
+	c04[C04: Rules Input]
 
-	subgraph d10[ ]
+	subgraph d00[ ]
 		direction LR
 
-		d100{{D100: Start Button}}
-		d101{{D101: Pause Button}}
-		d102{{D102: Step Button}}
-		d103{{D103: Run Button}}
+		d000{{D000: Start Button}}
+		d001{{D001: Pause Button}}
+		d002{{D002: Step Button}}
+		d003{{D003: Run Button}}
 
-		d104[(D104: State)]
-		d105[(D105: Run Input)]
+		d004[(D004: State)]
+		d005[(D005: Run Input)]
 
-		d106[/D106: Sender\]
+		d006[/D006: Sender\]
 
-		d100 & d101 & d102 & d103 == Send ==> d106
-		d100 & d101 <-. Read & Write .-> d104
-		d103 -. Read .-> d105
-		d102 -. Read .-> d104
-		d103 -. Read .-> d104
+		d000 & d001 & d002 & d003 == Send ==> d006
+		d000 & d001 <-. Read & Write .-> d004
+		d003 -. Read .-> d005
+		d002 -. Read .-> d004
+		d003 -. Read .-> d004
 	end
 
-	subgraph d11[ ]
+	subgraph d01[ ]
 		direction LR
 
-		d110{{D110: Speed Button}}
+		d010{{D010: Speed Button}}
 
-		d111[(D111: Speed Input)]
+		d011[(D011: Speed Input)]
 
-		d112[/D112: Sender\]
+		d012[/D012: Sender\]
 
-		d110 == Send ==> d112
-		d110 -. Read .-> d111
+		d010 == Send ==> d012
+		d010 -. Read .-> d011
 	end
 
-	subgraph d12[ ]
+	subgraph d02[ ]
 		direction LR
 
-		d120{{D120: Generate Button}}
-		d121{{D121: Clear Button}}
+		d020{{D020: Generate Button}}
+		d021{{D021: Clear Button}}
 
-		d122[(D122: Generate Input)]
+		d022[(D022: Generate Input)]
 
-		d123[/D123: Sender\]
+		d023[/D023: Sender\]
 
-		d120 & d121 == Send ==> d123
-		d120 -. Read .-> d122
+		d020 & d021 == Send ==> d023
+		d020 -. Read .-> d022
 	end
 
-	subgraph d13[ ]
+	subgraph d03[ ]
 		direction LR
 
-		d130{{D130: Size Button}}
+		d030{{D030: Size Button}}
 
-		d131[(D131: Width Input)]
-		d132[(D132: Height Input)]
-		d133[(D133: Torus Input)]
+		d031[(D031: Width Input)]
+		d032[(D032: Height Input)]
+		d033[(D033: Torus Input)]
 
-		d134[/D134: Sender\]
+		d034[/D034: Sender\]
 
-		d130 == Send ==> d134
-		d130 -. Read .-> d131 & d132 & d133
+		d030 == Send ==> d034
+		d030 -. Read .-> d031 & d032 & d033
 	end
 
-	subgraph d14[ ]
+	subgraph d04[ ]
 		direction LR
 
-		d140{{D140: Rules Button}}
+		d040{{D040: Rules Button}}
 
-		d141[(D141: Rules Input)]
+		d041[(D041: Rules Input)]
 
-		d142[/D142: Sender\]
+		d042[/D042: Sender\]
 
-		d140 == Send ==> d142
-		d140 -. Read .-> d141
+		d040 == Send ==> d042
+		d040 -. Read .-> d041
 	end
 
-	subgraph c2[ ];
+	subgraph c1[ ];
 		direction LR
 
-		c20{{C20: Visual Grid}}
+		c10{{C10: Visual Grid}}
 
-		c21[(C21: Data Grid)]
-		c22[(C22: Size)]
-		c23[(C23: Rules)]
-		c24[(C24: Clock)]
+		c11[(C11: Data Grid)]
+		c12[(C12: Size)]
+		c13[(C13: Rules)]
+		c14[(C14: Clock)]
 
-		c25[[C25: Step]]
-		c26[[C26: Play]]
-		c27[[C27: Pause]]
-		c28[[C28: Run]]
-		c29[[C29: Change Speed]]
-		c2a[[C2A: Generate]]
-		c2b[[C2B: Clear]]
-		c2c[[C2C: Change Size]]
-		c2d[[C2D: Change Rules]]
-		c2e[[C2E: Toggle]]
+		c16[[C16: Play]]
+		c17[[C17: Pause]]
+		c18[[C18: Run]]
+		c19[[C19: Change Speed]]
+		c1a[[C1A: Generate]]
+		c1b[[C1B: Clear]]
+		c1c[[C1C: Change Size]]
+		c1d[[C1D: Change Rules]]
+		c1e[[C1E: Toggle]]
 
-		c2f[\C2F: Receiver/]
+		c1f[\C1F: Receiver/]
 
-		c20 == Listen ==> c21
-		c20 -- Call --> c2e
-		c2e -. Read & Write .-> c21
-		c2c -. Write .-> c22
-		c2d -. Write .-> c23
-		c22 & c23 <-- Compose --> c21
-		c2f == Receive ==> c25 & c26 & c27 & c28 & c29
-		c2f == Receive ==> c2a & c2b & c2c & c2d
-		c2a & c2b -. Write .-> c21
-		c25 <-. Read & Write .-> c21
-		c28 & c24 -- Call --> c25
-		c26 & c27 & c29 -. Write .-> c24
+		subgraph c15[C15: Step]
+			direction TB
+
+			d150[[D150: Distribute]]
+			d151[[D151: Look Neighbors]]
+			d152[[D152 New State]]
+			d153[[D153: Combine]]
+
+			d150 --> d151 --> d152 --> d153
+		end
+
+		c10 == Listen ==> c11
+		c10 -- Call --> c1e
+		c1e -. Read & Write .-> c11
+		c1c -. Write .-> c12
+		c1d -. Write .-> c13
+		c12 & c13 <-- Compose --> c11
+		c1f == Receive ==> c15 & c16 & c17 & c18 & c19
+		c1f == Receive ==> c1a & c1b & c1c & c1d
+		c1a & c1b -. Write .-> c11
+		c15 <-. Read & Write .-> c11
+		c18 & c14 -- Call --> c15
+		c16 & c17 & c19 -. Write .-> c14
 	end
 
-	a --> b1 & b2
+	a --> b0 & b1
 
-	b1 --> c10 & c11 & c12 & c13 & c14
-	b2 ---> c2
+	b0 --> c00 & c01 & c02 & c03 & c04
+	b1 ---> c1
 
-	c10 --> d10
-	c11 --> d11
-	c12 --> d12
-	c13 --> d13
-	c14 --> d14
+	c00 --> d00
+	c01 --> d01
+	c02 --> d02
+	c03 --> d03
+	c04 --> d04
 ```

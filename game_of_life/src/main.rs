@@ -1,5 +1,3 @@
-#![feature(mixed_integer_ops)]
-#![feature(is_some_with)]
 #![allow(dead_code)]
 #![allow(unused_variables)]
 

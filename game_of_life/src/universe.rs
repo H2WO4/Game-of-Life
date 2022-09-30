@@ -17,7 +17,7 @@ pub enum Msg {
     Pause,
     Step,
 
-	VirtualStep,
+    VirtualStep,
     RunFor(u32),
 
     ChangeSpeed(u16),
@@ -95,11 +95,11 @@ impl Component for Obj {
 
                         if *cell {
                             *new_cell = self.rules.survive_arr[neighbors.iter()
-                                                                        .fold(0u16, |v, c| (v << 1) + u16::from(c.is_some_and(|c| *c)))
+                                                                        .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
                                                                as usize];
                         } else {
                             *new_cell = self.rules.birth_arr[neighbors.iter()
-                                                                      .fold(0u16, |v, c| (v << 1) + u16::from(c.is_some_and(|c| *c)))
+                                                                      .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
                                                              as usize];
                         }
                     }
@@ -109,7 +109,7 @@ impl Component for Obj {
                 true
             },
 
-			VirtualStep => {
+            VirtualStep => {
                 let (width, height) = self.cells.size();
 
                 // TODO: Multithreading
@@ -123,11 +123,11 @@ impl Component for Obj {
 
                         if *cell {
                             *new_cell = self.rules.survive_arr[neighbors.iter()
-                                                                        .fold(0u16, |v, c| (v << 1) + u16::from(c.is_some_and(|c| *c)))
+                                                                        .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
                                                                as usize];
                         } else {
                             *new_cell = self.rules.birth_arr[neighbors.iter()
-                                                                      .fold(0u16, |v, c| (v << 1) + u16::from(c.is_some_and(|c| *c)))
+                                                                      .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
                                                              as usize];
                         }
                     }
@@ -139,7 +139,8 @@ impl Component for Obj {
 
             RunFor(value) => {
                 if value != 0 {
-                    ctx.link().send_message(Msg::VirtualStep);
+                    ctx.link()
+                       .send_message(Msg::VirtualStep);
                     ctx.link()
                        .send_message(Msg::RunFor(value - 1));
                 }
