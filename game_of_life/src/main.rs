@@ -64,7 +64,7 @@ fn app() -> Html {
                 </div>
             </div>
 
-            <Universe width=96 height=64 />
+            <Universe width=96 height=63 />
         </>
     }
 }
