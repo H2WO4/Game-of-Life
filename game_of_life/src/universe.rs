@@ -95,11 +95,11 @@ impl Component for Obj {
 
                         if *cell {
                             *new_cell = self.rules.survive_arr[neighbors.iter()
-                                                                        .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
+                                                                        .fold(0u8, |v, c| (v << 1) + u8::from(if let Some(c) = c { *c } else { false }))
                                                                as usize];
                         } else {
                             *new_cell = self.rules.birth_arr[neighbors.iter()
-                                                                      .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
+                                                                      .fold(0u8, |v, c| (v << 1) + u8::from(if let Some(c) = c { *c } else { false }))
                                                              as usize];
                         }
                     }
