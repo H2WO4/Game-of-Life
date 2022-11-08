@@ -1,9 +1,14 @@
 [package]
-name = "tower_of_hanoi"
+name = "minesweeper"
 version = "0.1.0"
 edition = "2021"
 
-[toolchain]
-channel = "nightly"
 
 [dependencies]
+getrandom = { version = "0.2.7", features = ["js"] }
+grid = "0.8"
+log = "0.4"
+rand = "0.8.5"
+yew = "0.19"
+yew-agent = "0.1"
+wasm-logger = "0.2"

@@ -12,7 +12,7 @@ mod to_universe;
 mod universe;
 
 
-use std::collections::HashSet;
+use std::{collections::HashSet};
 use std::mem::replace;
 
 use gen_button::Obj as GenButton;

@@ -8,7 +8,6 @@ fn app() -> Html {
 		<>
 			<div class={ "option" }>
 				<div class={ "config" }>
-
 				</div>
 			</div>
 		</>

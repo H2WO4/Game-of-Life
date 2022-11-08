@@ -89,18 +89,16 @@ impl Component for Obj {
 
                 for x in 0..width {
                     for y in 0..height {
-                        let new_cell = new_cells.get_mut(x, y).unwrap();
-                        let cell = self.cells.get(x, y).unwrap();
+                        let cell = self.cells[x][y];
                         let neighbors = self.get_neighbors(x, y);
 
-                        if *cell {
-                            *new_cell = self.rules.survive_arr[neighbors.iter()
-                                                                        .fold(0u8, |v, c| (v << 1) + u8::from(if let Some(c) = c { *c } else { false }))
-                                                               as usize];
+                        let index = neighbors.iter()
+                                             .fold(0u8, |v, c| (v << 1) | if c == &Some(&true) { 1 } else { 0 });
+
+                        new_cells[x][y] = if cell {
+                            self.rules.survive_arr[index as usize]
                         } else {
-                            *new_cell = self.rules.birth_arr[neighbors.iter()
-                                                                      .fold(0u8, |v, c| (v << 1) + u8::from(if let Some(c) = c { *c } else { false }))
-                                                             as usize];
+                            self.rules.birth_arr[index as usize]
                         }
                     }
                 }
@@ -117,18 +115,16 @@ impl Component for Obj {
 
                 for x in 0..width {
                     for y in 0..height {
-                        let new_cell = new_cells.get_mut(x, y).unwrap();
-                        let cell = self.cells.get(x, y).unwrap();
+                        let cell = self.cells[x][y];
                         let neighbors = self.get_neighbors(x, y);
 
-                        if *cell {
-                            *new_cell = self.rules.survive_arr[neighbors.iter()
-                                                                        .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
-                                                               as usize];
+                        let index = neighbors.iter()
+                                             .fold(0u8, |v, c| (v << 1) | if c == &Some(&true) { 1 } else { 0 });
+
+                        new_cells[x][y] = if cell {
+                            self.rules.survive_arr[index as usize]
                         } else {
-                            *new_cell = self.rules.birth_arr[neighbors.iter()
-                                                                      .fold(0u16, |v, c| (v << 1) + u16::from(if let Some(c) = c { *c } else { false }))
-                                                             as usize];
+                            self.rules.birth_arr[index as usize]
                         }
                     }
                 }
@@ -239,10 +235,13 @@ impl Component for Obj {
     }
 }
 impl Obj {
-    fn get_neighbors(&self, x: usize, y: usize) -> [Option<bool>; 8] {
+    fn get_neighbors(&self, x: usize, y: usize) -> [Option<&bool>; 8] {
         const NEIGHBORS: [(isize, isize); 8] = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
 
         let (width, height) = self.cells.size();
+        let width = width as isize;
+        let height = height as isize;
+
         let x = x as isize;
         let y = y as isize;
 
@@ -251,24 +250,12 @@ impl Obj {
                      let y = y + j;
 
                      if self.torus {
-                         let x = match x {
-                             x if x < 0 => x + width as isize,
-                             x if x >= width as isize => x - width as isize,
-                             x => x,
-                         };
-                         let y = match y {
-                             y if y < 0 => y + height as isize,
-                             y if y >= height as isize => y - height as isize,
-                             y => y,
-                         };
+                         let x = x.rem_euclid(width);
+                         let y = y.rem_euclid(height);
 
-                         self.cells
-                             .get(x as usize, y as usize)
-                             .and_then(|val| Some(*val))
+                         self.cells.get(x as usize, y as usize)
                      } else {
-                         self.cells
-                             .get(x as usize, y as usize)
-                             .and_then(|val| Some(*val))
+                         self.cells.get(x as usize, y as usize)
                      }
                  })
     }

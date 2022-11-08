@@ -72,7 +72,7 @@ impl Default for Rules {
     }
 }
 impl PartialEq for Rules {
-	fn eq(&self, other: &Self) -> bool {
-		self.birth == other.birth && self.survive == other.survive
-	}
+    fn eq(&self, other: &Self) -> bool {
+        self.birth == other.birth && self.survive == other.survive
+    }
 }

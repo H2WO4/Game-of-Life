@@ -1,0 +1,30 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0px;
+	padding: 0px;
+
+	display: flex;
+}
+
+.option {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	background-color: black;
+
+	width: 30%;
+	height: 100vh;
+	padding: 5px;
+
+	&>.config>* {
+		display: flex;
+		flex-direction: row;
+		width: 80%;
+
+		margin: 3% auto;
+	}
+}

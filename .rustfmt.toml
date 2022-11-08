@@ -1,7 +1,7 @@
 unstable_features = true
 edition = "2021"
 
-max_width = 160
+max_width = 120
 chain_width = 40
 force_multiline_blocks = false
 blank_lines_upper_bound = 2
