@@ -12,7 +12,7 @@ mod to_universe;
 mod universe;
 
 
-use std::{collections::HashSet};
+use std::collections::HashSet;
 use std::mem::replace;
 
 use gen_button::Obj as GenButton;
@@ -71,5 +71,5 @@ fn app() -> Html {
 
 fn main() {
     wasm_logger::init(wasm_logger::Config::default());
-    yew::start_app::<App>();
+    yew::Renderer::<App>::new().render();
 }

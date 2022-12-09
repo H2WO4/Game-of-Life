@@ -1,14 +1,13 @@
 [package]
-name = "minesweeper"
+name = "tower_of_hanoi"
 version = "0.1.0"
 edition = "2021"
 
 
 [dependencies]
-getrandom = { version = "0.2.7", features = ["js"] }
-grid = "0.8"
+getrandom = { version = "0.2", features = ["js"] }
 log = "0.4"
-rand = "0.8.5"
+rand = "0.8"
 yew = "0.19"
 yew-agent = "0.1"
-wasm-logger = "0.2"
+wasm-logger = "0.2.0"

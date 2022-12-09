@@ -1,17 +1,18 @@
 use yew::prelude::*;
 
+mod tower;
 
 
 #[function_component(App)]
 fn app() -> Html {
-	html! {
-		<>
-			<div class={ "option" }>
-				<div class={ "config" }>
-				</div>
-			</div>
-		</>
-	}
+    html! {
+        <>
+            <div class={ "option" }>
+                <div class={ "config" }>
+                </div>
+            </div>
+        </>
+    }
 }
 
 fn main() {

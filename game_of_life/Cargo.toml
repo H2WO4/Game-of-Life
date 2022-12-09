@@ -5,16 +5,16 @@ edition = "2021"
 
 
 [dependencies]
-getrandom = { version = "0.2.7", features = ["js"] }
-gloo-timers = "0.2.4"
-grid = "0.8"
-lazy-regex = "2.3.0"
+getrandom = { version = "0.2", features = ["js"] }
+gloo-timers = "0.2"
+grid = "0.9"
+lazy-regex = "2.3"
 log = "0.4"
-rand = "0.8.5"
-rayon = "1.5.3"
-regex = "1.6.0"
-yew = "0.19"
+rand = "0.8"
+rayon = "1.6"
+regex = "1.7"
+yew = { version = "0.20", features = ["csr"] }
 yew-agent = "0.1"
-yew-canvas = "0.2.2"
+yew-canvas = "0.2"
 wasm-logger = "0.2"
-web-sys = "0.3.60"
+web-sys = "0.3"
