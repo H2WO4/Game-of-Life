@@ -16,8 +16,11 @@ La Tour de Hanoï est un jeu fascinant pour les amateurs de logique et de strat�
 
 ## Partie 1 : Analyse description de niveau zéro
 
-Le plateau est composé de 3 tige.
+Le plateau est composé habituellement de 3 tiges, on possède 4 disques de tailles différentes au minimum.
 
+Le but est de déplacer tous les disques de la tige de gauche vers la tige de droite. Pour ce faire, on ne peut déplacer qu'un seul disque à la fois et on ne peut pas placer un disque plus grand sur un disque plus petit.
+
+![Tour d’Hanoï](https://upload.wikimedia.org/wikipedia/commons/0/07/Tower_of_Hanoi.jpeg)
 
 ## Cahier des charges
 
@@ -375,4 +378,12 @@ win=(mat(1,3)==1)
 ```
 ---
 
-## Conlusion
+## Conclusion
+
+La Tour de Hanoï est un jeu de logique passionnant qui met à l'épreuve les capacités de résolution de problèmes des joueurs. Nos résultats suggèrent que la complexité du jeu et l'expérience du joueur peuvent être des facteurs importants dans la résolution du jeu. 
+
+La tâche de la Tour de Hanoï est utilisée dans la recherche en psychologie notamment au travers de la résolution de problème. Il est également utilisé comme test neuropsychologique.
+
+Cette tâche est sensible aux dysfonctionnements frontaux et préfrontaux.
+
+Ce test permet ainsi l'évaluation des fonctions exécutives, comme la planification, la mémoire de travail et l'inhibition.
