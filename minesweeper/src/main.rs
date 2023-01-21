@@ -1,3 +1,12 @@
+#![allow(dead_code)]
+#![allow(clippy::enum_glob_use)]
+
+
+mod cell;
+mod minefield;
+
+
+use minefield::Obj as Minefield;
 use yew::prelude::*;
 
 
@@ -9,6 +18,7 @@ fn app() -> Html {
                 <div class={ "config" }>
                 </div>
             </div>
+            <Minefield height=10 width=10/>
         </>
     }
 }

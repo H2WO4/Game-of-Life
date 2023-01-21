@@ -28,3 +28,48 @@ body {
 		margin: 3% auto;
 	}
 }
+
+.minefield {
+	display: flex;
+	flex-direction: column;
+	margin: 0px;
+
+	width: 70%;
+}
+
+.inner-row {
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+}
+
+.cell {
+	display: block;
+
+	border: none;
+	width: 100%;
+	cursor: pointer;
+
+	&.hidden {
+		background-color: grey;
+	}
+
+	&.flagged {
+		background-color: blue;
+	}
+
+	&.mine {
+		background-color: red;
+	}
+
+	&.num {
+		background-color: white;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 30px
+	}
+}
